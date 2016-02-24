@@ -7,7 +7,6 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/jmoiron/sqlx"
 	"github.com/rancher/go-rancher/api"
-
 	"github.com/rancher/go-rancher/client"
 )
 
@@ -33,7 +32,7 @@ func New(driver, driverName string) (*Server, error) {
 }
 
 func (s *Server) namedQuery(query string, args map[string]interface{}) (*sqlx.Rows, error) {
-	rows, err := s.DB.NamedQuery(query, args)
+	rows, err := s.DB.Unsafe().NamedQuery(query, args)
 	return rows, err
 }
 

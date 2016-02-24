@@ -10,6 +10,7 @@ func NewSchema() *client.Schemas {
 	schemas.AddType("apiVersion", client.Resource{})
 	schemas.AddType("schema", client.Schema{})
 	schemas.AddType("service", Service{})
+	schemas.AddType("stack", Stack{})
 
 	return schemas
 }
