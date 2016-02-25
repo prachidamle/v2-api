@@ -1,11 +1,10 @@
 package server
 
 import (
-	"net/http"
-	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/rancher/go-rancher/client"
-	model "github.com/rancher/v2-api/model"
+	"github.com/rancher/v2-api/model"
+	"net/http"
 )
 
 func (s *Server) StackByID(rw http.ResponseWriter, r *http.Request) error {
@@ -32,22 +31,25 @@ func (s *Server) getStack(rw http.ResponseWriter, r *http.Request, id string) er
 	response := &client.GenericCollection{
 		Collection: client.Collection{
 			Type:         "collection",
-			ResourceType: "Stack",
+			ResourceType: "stack",
 		},
 	}
 
 	for rows.Next() {
 		obj := &model.Stack{}
-		obj.Type = "Stack"
+		obj.Type = "stack"
 
 		if err := rows.StructScan(obj); err != nil {
 			return err
-		}		
+		}
 
 		// Obfuscate Ids
 		obj.Id = s.obfuscate(r, "Stack", obj.Id)
 
-		// Probably do something more with data
+		if err = s.parseData(obj.Data, obj); err != nil {
+			return err
+		}
+
 		response.Data = append(response.Data, obj)
 	}
 
@@ -55,9 +57,10 @@ func (s *Server) getStack(rw http.ResponseWriter, r *http.Request, id string) er
 }
 
 func (s *Server) getStacksSQL(r *http.Request, id string) string {
-	q := `
-		SELECT
-			*  
+
+	commonSql := s.getSql(r, &model.Common{})
+
+	q := `SELECT ` + commonSql + `
 		FROM environment
 		WHERE
 			account_id = :account_id

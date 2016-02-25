@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+
 	"github.com/Sirupsen/logrus"
 	"github.com/jmoiron/sqlx"
 	"github.com/rancher/go-rancher/api"
@@ -92,4 +93,27 @@ func (s *Server) parseInputParameters(r *http.Request) InputData {
 	decoder := json.NewDecoder(r.Body)
 	decoder.Decode(data)
 	return data
+}
+
+func (s *Server) parseData(dataStr string, obj interface{}) error {
+	type Data struct {
+		Fields interface{} `json:"fields"`
+	}
+
+	data := Data{}
+
+	bytes := []byte(dataStr)
+
+	if err := json.Unmarshal(bytes, &data); err != nil {
+		return err
+	}
+	fieldsM, err := json.Marshal(data.Fields)
+	if err != nil {
+		return err
+	}
+	if err = json.Unmarshal(fieldsM, &obj); err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -1,18 +1,16 @@
 package model
 
-import "github.com/go-sql-driver/mysql"
-
 type ID string
 
 type Common struct {
-	Name                 string         `json:"name"`
-	Description          string         `json:"description"`
-	State                string         `json:"state"`
-	UUID                 string         `json:"uuid"`
-	Created              mysql.NullTime `json:"created" db:"created"`
-	Removed              mysql.NullTime `json:"removed" db:"removed"`
-	ParentType           string         `json:"parentType"`
-	Data                 string         `json:"_"`
-	Transitioning        string         `json:"transitioning"`
-	TransitioningMessage string         `json:"transitioningMessage"`
+	Name                 string `json:"name,omitempty" db:"name"`
+	Description          string `json:"description,omitempty" db:"description"`
+	State                string `json:"state,omitempty" db:"state"`
+	UUID                 string `json:"uuid,omitempty" db:"uuid"`
+	Created              string `json:"created" db:"created" db:"created"`
+	Removed              string `json:"removed,omitempty" db:"removed"`
+	ParentType           string `json:"parentType,omitempty"`
+	Data                 string `db:"data"`
+	Transitioning        string `json:"transitioning,omitempty"`
+	TransitioningMessage string `json:"transitioningMessage,omitempty"`
 }
