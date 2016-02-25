@@ -3,7 +3,7 @@ package server
 import (
 	"encoding/json"
 	"net/http"
-
+	"strings"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/jmoiron/sqlx"
@@ -72,7 +72,7 @@ func (s *Server) writeResponse(err error, r *http.Request, data interface{}) err
 }
 
 func (s *Server) deobfuscate(r *http.Request, typeName string, id string) string {
-	return id
+	return strings.TrimPrefix(id, "1blah")
 }
 
 func (s *Server) obfuscate(r *http.Request, typeName string, id string) string {

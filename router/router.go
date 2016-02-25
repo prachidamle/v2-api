@@ -23,6 +23,16 @@ func New(s *server.Server) *mux.Router {
 	router.Methods("GET").Path("/v2/service").Handler(f(schemas, s.ServiceList))
 
 	router.Methods("GET").Path("/v2/stacks").Handler(f(schemas, s.StackList))
+	router.Methods("GET").Path("/v2/stack").Handler(f(schemas, s.StackList))
+	router.Methods("GET").Path("/v2/stacks/{id}").Handler(f(schemas, s.StackByID))
+	router.Methods("GET").Path("/v2/stack/{id}").Handler(f(schemas, s.StackByID))
+	router.Methods("POST").Path("/v2/stacks").Handler(f(schemas, s.StackCreate))
+
+	router.Methods("GET").Path("/v2/nodes").Handler(f(schemas, s.NodeList))
+	router.Methods("GET").Path("/v2/node").Handler(f(schemas, s.NodeList))
+	router.Methods("GET").Path("/v2/nodes/{id}").Handler(f(schemas, s.NodeByID))
+	router.Methods("GET").Path("/v2/node/{id}").Handler(f(schemas, s.NodeByID))
+	router.Methods("POST").Path("/v2/nodes").Handler(f(schemas, s.NodeCreate))
 
 	return router
 }

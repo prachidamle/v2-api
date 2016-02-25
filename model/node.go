@@ -2,19 +2,43 @@ package model
 
 import "github.com/rancher/go-rancher/client"
 
-type Node struct {
-	client.Resource
+type NodeCommon struct {
 	Common
-
-	AgentState      string                 `json:"agentState,omitempty" yaml:"agent_state,omitempty"`
-	Info            interface{}            `json:"info,omitempty" yaml:"info,omitempty"`
+	AgentState      string                 `json:"agentState,omitempty" yaml:"agent_state,omitempty" db:"agent_state"`
 	Hostname        string                 `json:"hostname,omitempty" yaml:"hostname,omitempty"`
+	Info            interface{}            `json:"info,omitempty" yaml:"info,omitempty"`
 	Labels          map[string]interface{} `json:"labels,omitempty" yaml:"labels,omitempty"`
+	PhysicalHostId  string                 `json:"physicalHostId,omitempty" yaml:"physical_host_id,omitempty" db:"physical_host_id"`
 	PublicEndpoints []interface{}          `json:"publicEndpoints,omitempty" yaml:"public_endpoints,omitempty"`
-	ContainerIds    []ID                   `json:"containerIds"`
+}
+
+type NodeV1 struct {
+	client.Resource
+	NodeCommon
+	AgentId      string `json:"agentId,omitempty" yaml:"agent_id,omitempty"`
+	ApiProxy     string `json:"apiProxy,omitempty" yaml:"api_proxy,omitempty"`
+	ComputeTotal int64  `json:"computeTotal,omitempty" yaml:"compute_total,omitempty"`
+	Kind         string `json:"kind,omitempty" yaml:"kind,omitempty"`
+}
+
+type NodeV2 struct {
+	client.Resource
+	NodeCommon
+	InstanceIds []ID `json:"instanceIds"`
 }
 
 type NodeList struct {
 	client.Collection
-	Data []Node `json:"data,omitempty"`
+	Data []NodeV2 `json:"data,omitempty"`
+}
+
+func getNodeSchema(schemas *client.Schemas) {
+	node := schemas.AddType("node", NodeV2{})
+	node.ResourceActions = map[string]client.Action{
+		"create": client.Action{
+			Input:  "",
+			Output: "node",
+		},
+	}
+	node.CollectionMethods = []string{"GET", "POST"}
 }

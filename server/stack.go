@@ -17,7 +17,7 @@ func (s *Server) StackList(rw http.ResponseWriter, r *http.Request) error {
 }
 
 func (s *Server) getStack(rw http.ResponseWriter, r *http.Request, id string) error {
-	id = s.deobfuscate(r, "Stack", id)
+	id = s.deobfuscate(r, "stack", id)
 
 	rows, err := s.namedQuery(s.getStacksSQL(r, id), map[string]interface{}{
 		"account_id": s.getAccountID(r),
@@ -36,33 +36,45 @@ func (s *Server) getStack(rw http.ResponseWriter, r *http.Request, id string) er
 	}
 
 	for rows.Next() {
-		obj := &model.Stack{}
+		obj := &model.StackV1{}
 		obj.Type = "stack"
 
 		if err := rows.StructScan(obj); err != nil {
 			return err
 		}
-
 		// Obfuscate Ids
-		obj.Id = s.obfuscate(r, "Stack", obj.Id)
+		obj.Id = s.obfuscate(r, "stack", obj.Id)
 
 		if err = s.parseData(obj.Data, obj); err != nil {
 			return err
 		}
 
-		response.Data = append(response.Data, obj)
+		response.Data = append(response.Data, s.stackV1ToV2(obj))
 	}
 
 	return s.writeResponse(rows.Err(), r, response)
 }
 
+func (s *Server) stackV1ToV2(obj *model.StackV1) *model.StackV2 {
+	objV2 := &model.StackV2{
+		Resource:    obj.Resource,
+		StackCommon: obj.StackCommon,
+		Variables:   obj.Environment,
+	}
+	return objV2
+}
+
 func (s *Server) getStacksSQL(r *http.Request, id string) string {
 
 	commonSql := s.getSql(r, &model.Common{})
+	stackSql := s.getSql(r, &model.StackCommon{})
+	if stackSql != "" {
+		stackSql = `, ` + stackSql
+	}
 
-	q := `SELECT ` + commonSql + `
-		FROM environment
-		WHERE
+	q := `SELECT COALESCE(id, '') as id, ` + commonSql + stackSql +
+		` FROM environment
+		  WHERE
 			account_id = :account_id
 			AND removed IS NULL`
 
