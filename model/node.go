@@ -33,12 +33,7 @@ type NodeList struct {
 }
 
 func getNodeSchema(schemas *client.Schemas) {
-	node := schemas.AddType("node", NodeV2{})
-	node.ResourceActions = map[string]client.Action{
-		"create": client.Action{
-			Input:  "",
-			Output: "node",
-		},
-	}
+	node := AddType(schemas, "node", NodeV2{}, (*client.HostOperations)(nil))
 	node.CollectionMethods = []string{"GET", "POST"}
+	V2ToV1NamesMap["node"] = "host"	
 }

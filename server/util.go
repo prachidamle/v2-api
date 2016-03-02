@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
+	"encoding/json"
 )
 
 func (s *Server) getAccountID(r *http.Request) int64 {
@@ -26,4 +27,30 @@ func (s *Server) getSql(r *http.Request, obj interface{}) string {
 	}
 
 	return strings.TrimSuffix(sql, ", ")
+}
+
+func (s *Server) parseData(dataStr string, obj interface{}) error {
+
+	type Data struct {
+		Fields interface{} `json:"fields"`
+	}
+
+	data := Data{}
+
+	bytes := []byte(dataStr)
+
+	if err := json.Unmarshal(bytes, &data); err != nil {
+		return err
+	}
+
+	fieldsM, err := json.Marshal(data.Fields)
+	if err != nil {
+		return err
+	}
+
+	if err = json.Unmarshal(fieldsM, &obj); err != nil {
+		return err
+	}
+
+	return nil
 }
